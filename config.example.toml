@@ -1,0 +1,56 @@
+# Скопируйте в config.toml и поправьте. Любой ключ можно переопределить переменной
+# окружения ALICE_<СЕКЦИЯ>_<КЛЮЧ>, например ALICE_LLM_API_KEY=gsk_...
+
+[server]
+host = "0.0.0.0"
+https_port = 443          # 0 — не поднимать HTTPS (например, TLS снимает ваш прокси)
+http_port = 80            # 0 — не поднимать HTTP
+certfile = "certs/server.crt"
+keyfile = "certs/server.key"
+# Что подставить в get_sync_info → system_config.uniProxyUrl. Пусто — оставить wss://uniproxy.alice.yandex.net/uni.ws
+public_uniproxy_url = ""
+data_dir = "data"
+log_level = "INFO"
+log_traffic = true        # весь JSON-трафик uniproxy в data/traffic/*.jsonl
+
+[asr]
+engine = "gigaam"         # gigaam | openai
+model = "v3_e2e_rnnt"     # GigaAM v3 с пунктуацией; v3_e2e_ctc — чуть быстрее
+device = "auto"           # auto | cpu | cuda
+# Silero VAD: определяет конец фразы и вырезает тишину перед распознаванием
+vad_silence_ms = 700      # пауза, после которой фраза считается законченной
+vad_threshold = 0.5
+max_utterance_ms = 10000
+no_speech_timeout_ms = 5000
+
+[llm]
+# Любой OpenAI-совместимый API со стримингом. Groq (бесплатно): ключ на https://console.groq.com/keys
+base_url = "https://api.groq.com/openai/v1"
+api_key = ""              # или переменная окружения GROQ_API_KEY
+model = "qwen/qwen3.8-27b"
+# OpenRouter (бесплатные модели с суффиксом :free):
+#   base_url = "https://openrouter.ai/api/v1", model = "qwen/...:free"
+# Локально через Ollama: base_url = "http://127.0.0.1:11434/v1", model = "qwen3:8b"
+temperature = 0.6
+max_tokens = 400
+history_turns = 8
+history_ttl_s = 300        # через 5 минут тишины диалог начинается заново
+listen_after_question = true
+hold_response_ms = 400     # сколько ждать конца ответа LLM после готовности первой фразы
+extra_body = { reasoning_effort = "none" }  # без «размышлений» Qwen; сервер не принял — поле уберётся само
+# system_prompt = "..."
+
+[tts]
+engine = "f5"              # f5 (клон голоса, tools/f5_server.py) | edge (онлайн, запасной) | openai
+f5_url = "http://127.0.0.1:8777/v1"
+f5_voice_id = "ref_voice_1"   # метка эталона для кэша; сменил голос — смени метку
+# edge: voice = "ru-RU-SvetlanaNeural", rate = "+0%"
+
+[device]
+# Используются, если нет данных, импортированных из HAR (tools/import_har.py)
+name = "Яндекс Станция"
+display_name = "Хозяин"
+latitude = 55.7558
+longitude = 37.6173
+timezone = "Europe/Moscow"
+timezone_offset_sec = 10800

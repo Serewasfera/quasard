@@ -1,0 +1,21 @@
+# окружения и кэш
+.venv/
+__pycache__/
+tts_bench/
+
+# личное: ключи, токены, конфиг, промпт, голос, данные станций, сертификаты, логи трафика
+config.toml
+groq_key.txt
+system_prompt.txt
+data/
+voice/
+certs/
+models/
+logs/
+*.har
+*.log
+*.wav
+*.ogg
+*.mp3
+*.mp4
+COMMIT_MSG.txt 

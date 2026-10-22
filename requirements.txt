@@ -1,0 +1,16 @@
+# PyTorch с CUDA ставится отдельно (для RTX 50xx нужен cu128+):
+#   uv pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu128
+fastapi
+uvicorn[standard]
+websockets
+httpx
+numpy
+av                # декодирование/кодирование Ogg/Opus (ffmpeg внутри колеса)
+gigaam @ git+https://github.com/salute-developers/GigaAM   # ASR
+onnxruntime       # Silero VAD (alice_server/assets/silero_vad.onnx)
+omegaconf
+edge-tts          # запасной TTS (онлайн, без ключа)
+yandex-music      # музыка: поиск, «Моя волна», прямые ссылки (alice_server/music.py)
+protobuf          # protobuf-протокол uniproxy прошивок 3.x (alice_server/aliceapi.py)
+cryptography      # glagol-сертификаты, tools/gen_certs.py
+tzdata            # часовые пояса на Windows
