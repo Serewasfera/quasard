@@ -30,6 +30,7 @@ from .config import Config
 from .llm import Dialog
 from .music import Music
 from .tts import Synthesizer
+from .ytmusic import YTMusicAsync
 
 log = logging.getLogger("uniproxy")
 
@@ -65,7 +66,37 @@ class Services:
         self.dialog = Dialog(cfg.llm, cfg.device.timezone)
         self.tts = Synthesizer(cfg.tts, cfg.data_path)
         self.music = Music(cfg.music, cfg.data_path)
+        auth = cfg.resolve(cfg.ytmusic.auth) if cfg.ytmusic.auth else cfg.data_path / "ytmusic_browser.json"
+        self.ytmusic = YTMusicAsync(cfg.ytmusic, auth)
         self.connections: dict[str, set["UniproxySession"]] = {}
+
+    def music_source(self, device: str) -> str | None:
+        """Какой проигрыватель сейчас ведёт устройства: 'yandex' | 'youtube' | None.
+
+        Источник не меняется на «дальше/лайк» — сменить его можно только новой командой включения.
+        """
+        if device in self.music.sessions:
+            return "yandex"
+        if device in self.ytmusic.sessions:
+            return "youtube"
+        return None
+
+    def pick_source(self, action: str, query: str) -> str:
+        """Куда отправить команду wave/search по configured source."""
+        want = (self.cfg.music.source or "yandex").lower()
+        ym_ok = self.music.enabled
+        yt_ok = self.ytmusic.enabled
+        if want == "youtube":
+            return "youtube" if yt_ok else ("yandex" if ym_ok else "none")
+        if want == "auto":
+            # «в ютубе/ютуб музыка» в запросе — явный сигнал уйти в YouTube
+            q = query.lower()
+            if yt_ok and any(w in q for w in ("ютуб", "youtube", "йутуб", "иутуб")):
+                return "youtube"
+            if action == "wave" and ym_ok:
+                return "yandex"  # «просто музыку» — куда надёжнее
+            return "yandex" if ym_ok else ("youtube" if yt_ok else "none")
+        return "yandex" if ym_ok else ("youtube" if yt_ok else "none")
 
 
 class UniproxySession:
