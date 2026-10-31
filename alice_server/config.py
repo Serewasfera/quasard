@@ -93,8 +93,18 @@ class TtsCfg:
 @dataclass
 class MusicCfg:
     enabled: bool = True
+    source: str = "yandex"  # yandex | youtube | auto (автовыбор: что авторизовано; при «next» источник не меняется)
     token: str = ""  # пусто — берётся из data/music_token.json (tools/music_login.py)
     quality: str = "high"  # high — mp3 320, low — 128/192
+
+
+@dataclass
+class YtMusicCfg:
+    """YouTube Music (alice_server/ytmusic.py): поиск, радиоволна по треку, прямые ссылки yt-dlp."""
+    enabled: bool = False
+    auth: str = ""  # путь к data/browser.json (tools/ytmusic_login.py); пусто — тот же файл
+    quality: str = "high"  # high — ~128 kbps AAC (itag 140), low — ~48 kbps (itag 139)
+    limit_search: int = 20  # сколько треков брать из поиска
 
 
 @dataclass
@@ -116,6 +126,7 @@ class Config:
     llm: LlmCfg = field(default_factory=LlmCfg)
     tts: TtsCfg = field(default_factory=TtsCfg)
     music: MusicCfg = field(default_factory=MusicCfg)
+    ytmusic: YtMusicCfg = field(default_factory=YtMusicCfg)
     device: DeviceCfg = field(default_factory=DeviceCfg)
 
     @property
